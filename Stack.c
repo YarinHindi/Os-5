@@ -6,58 +6,60 @@
 #define MAX_LENGTH 1024
 typedef struct Stack {
     Node *head;
+    void * current_adress;
 }Stack;
 
-Node *top(Node **stack) {
-    if(*stack==NULL){}
-    return (*stack);
+Node *top(Stack **stack) {
+    if((*stack)->head!=NULL) {
+        return (*stack)->head;
+    }
 }
 
-void initializeStack(Node **stack) {
-    (*stack) = NULL;
+void initializeStack(Stack **stack) {
+    (*stack)->current_adress = (*stack)+sizeof(Stack);
+//    (*stack)->head = (Node*)(*stack)->current_adress;
+    (*stack)->head = NULL;
 }
 
 
-void pop(Node **stack) {
+void pop(Stack **stack) {
     if ((*stack)  == NULL) {
         return;
     }
-    if ((*stack)->next  == NULL) {
-        free((*stack)->data);
-        free((*stack));
-        (*stack)  = NULL;
+    if ((*stack)->head->next  == NULL) {
+        (*stack)->head  = NULL;
         return;
     } else {
-        Node *temp = (*stack) ;
-        (*stack) = (*stack)->next;
-        free(temp->data);
-        free(temp);
+        Node *temp = (*stack)->head ;
+        (*stack)->head = (*stack)->head->next;
+
         return;
     }
 
 }
 
-void push(Node **stack, char *data) {
-    Node *newNode = (Node*)(malloc)(sizeof(Node));
-    newNode->data = (char *)(malloc)(MAX_LENGTH);
+void push(Stack **stack, char *data) {
+    Node *newNode = (Node*)(*stack)->current_adress;
+    newNode->data = (char*)(*stack)->current_adress+sizeof(Node);
     for (int i = 0; i < MAX_LENGTH; ++i) {
         newNode->data[i] = data[i];
     }
     newNode->next = NULL;
     if ((*stack) == NULL) {
-        (*stack) = newNode;
+        (*stack)->head = newNode;
     } else {
-        newNode->next = (*stack) ;
-        (*stack) = newNode;
+        newNode->next = (*stack)->head ;
+        (*stack)->head = newNode;
     }
+    (*stack)->current_adress +=MAX_LENGTH+sizeof(Node);
 }
 void release(Node **stack){
     Node *temp = (*stack);
     Node *temp1 = (*stack);
     while (temp!=NULL){
         temp1 = temp->next;
-        free(temp->data);
-        free(temp);
+//        sfree(temp->data);
+//        sfree(temp);
         temp = temp1;
     }
 

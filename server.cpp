@@ -9,18 +9,19 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
-#include <pthread.h>
 #include <signal.h>
 #include "Stack.c"
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>
 //#include "heap.c"
 #include <sys/mman.h>
 
 #define MAX_LENGTH 1024
-#define PORT "3492"  // the port users will be connecting to
+#define PORT "3490"  // the port users will be connecting to
 #define BACKLOG 10   // how many pending connections queue will hold
 Stack *myStack ;
+struct flock lock;
 void sigchld_handler(int s)
 {
     // waitpid() might overwrite errno, so we save and restore it:
@@ -30,35 +31,35 @@ void sigchld_handler(int s)
     errno = saved_errno;
 }
 
-//void broadcast() {
-//
-//}
-
 void handelClients(int  newfd1) {
     while (1) {
+        memset(&lock, 0, sizeof(lock));
+        lock.l_type = F_WRLCK;
+        fcntl(newfd1, F_SETLK, &lock);
         char user_input[MAX_LENGTH];
         char user_push[5];
-        char dq_eq[8];
         char rest[MAX_LENGTH];
         char user_pop_top[4];
         memset(user_input, 0, MAX_LENGTH);
         memset(user_pop_top, 0, 4);
         memset(rest, 0, MAX_LENGTH);
-        memset(dq_eq,0,8);
         recv(newfd1, user_input, MAX_LENGTH, 0);
         strncpy(user_pop_top, user_input, 3);
         strncpy(user_push, user_input, 4);
-        strncpy(dq_eq,user_input,7);
+        printf("lets see %d",newfd1);
         if (strcmp(user_pop_top, "POP") == 0) {
-            pop(&myStack->head);
+            pop(&myStack);
         } else if (strcmp(user_push, "PUSH") == 0) {
             for (int i = 5; i < strlen(user_input); i++) {
                 rest[i - 5] = user_input[i];
             }
-            push(&myStack->head, rest);
+            push(&myStack, rest);
         } else if (strcmp(user_pop_top, "TOP") == 0) {
-            send(newfd1, top(&myStack->head)->data, MAX_LENGTH, 0);
+            send(newfd1, top(&myStack)->data, MAX_LENGTH, 0);
+
         }
+        lock.l_type = F_UNLCK;
+        fcntl(newfd1, F_SETLKW, &lock);
         printf("%s",user_input);
     }
 }
@@ -76,12 +77,28 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(void)
 {
+//    while (1)
+//    {
+//        // main accept() loop
+//        sin_size = sizeof their_addr;
+//
+//        // locking the access to the server
+//        struct flock lock;
+//        memset(&lock, 0, sizeof(lock));
+//        lock.l_type = F_WRLCK;
+//        fcntl(sockfd, F_SETLK, &lock);
+//        //unlock file discriptor
+//        lock.l_type = F_UNLCK;
+//        fcntl(sockfd, F_SETLKW, &lock);
+
+
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
-    myStack = (Stack*)mmap(NULL,100000,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
-    myStack = (Stack*)Mymalloc(sizeof (Stack));
-//    myStack = mmap(NULL,PAGESIZE,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
-    initializeStack(&myStack->head);
+    myStack = (Stack *)mmap(NULL,1000000,PROT_READ |PROT_WRITE, MAP_ANONYMOUS|MAP_SHARED ,-1,0);
+//    myStack = (Stack*)smalloc(sizeof (Stack));
+    initializeStack(&myStack);
+//    myStack->head->data = "dsadas";
+
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
     struct sigaction sa;
@@ -158,8 +175,8 @@ int main(void)
                   get_in_addr((struct sockaddr *)&their_addr),
                   s, sizeof s);
         printf("server: got connection from %s\n", s);
-        pid_t pid;
-        if( pid  = fork()<0){
+        pid_t pid = fork();
+        if( pid <0){
             printf("failed fork");
 
         }else if(pid==0){
@@ -169,8 +186,8 @@ int main(void)
 //            wait(NULL);
         }
         if(couneter>10){
-            release(&myStack->head);
-            Myfree(myStack);
+//            release(&myStack->head);
+//            sfree(myStack);
             break;
 
         }

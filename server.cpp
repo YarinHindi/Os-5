@@ -46,7 +46,6 @@ void handelClients(int  newfd1) {
         recv(newfd1, user_input, MAX_LENGTH, 0);
         strncpy(user_pop_top, user_input, 3);
         strncpy(user_push, user_input, 4);
-        printf("lets see %d",newfd1);
         if (strcmp(user_pop_top, "POP") == 0) {
             pop(&myStack);
         } else if (strcmp(user_push, "PUSH") == 0) {

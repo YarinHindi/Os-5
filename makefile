@@ -14,11 +14,9 @@ client: client.cpp
 Stack.o:  Stack.c
 	$(CC) $(Flag)  Stack.c
 
-#heap.o :heap.c
-#	$(CC) $(Flag)  heap.c
 
-#Node.o:	Node.c
-#	$(CC) $(Flag)  Node.c
+Node.o:	Node.c
+	$(CC) $(Flag)  Node.c
 
 .PHONY: clean all
 

@@ -1,5 +1,5 @@
 #define _MAP_MANAGEMENT_H 1
-
+///TAKEN FROM GITHUB OF https://github.com/chrisvrose/os3-malloc
 struct allocmem{
     void* ptr;
     size_t size;

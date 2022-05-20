@@ -16,7 +16,6 @@ Node *top(Stack **stack) {
 
 void initializeStack(Stack **stack) {
     (*stack)->current_adress = (*stack)+sizeof(Stack);
-//    (*stack)->head = (Node*)(*stack)->current_adress;
     (*stack)->head = NULL;
 }
 
@@ -57,8 +56,6 @@ void release(Node **stack){
     Node *temp1 = (*stack);
     while (temp!=NULL){
         temp1 = temp->next;
-//        sfree(temp->data);
-//        sfree(temp);
         temp = temp1;
     }
 

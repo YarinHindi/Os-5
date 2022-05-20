@@ -10,7 +10,7 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #define MAX_LENGTH 1024
-#define PORT "3490" // the port client will be connecting to
+#define PORT "3491" // the port client will be connecting to
 int finish =0;
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 

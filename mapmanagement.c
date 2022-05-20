@@ -11,10 +11,8 @@
 
 static struct allocmem* memlocs = NULL;
 
-
 struct allocmem *newAllocMem(){
     struct allocmem* ptr;
-    //void* res = mmap(NULL,sizeof(struct allocmem),PROT_READ|PROT_WRITE);
     if((ptr = mmap(NULL,sizeof(struct allocmem),PROT_READ | PROT_WRITE , MAP_POPULATE | MAP_ANONYMOUS | MAP_PRIVATE,-1,0))==MAP_FAILED){
         return NULL;
     }
